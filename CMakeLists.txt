@@ -308,7 +308,7 @@ if("${CMAKE_C_COMPILER_ID}" MATCHES "GNU|Clang")
   set(ENV{PKG_CONFIG_PATH}
       "$ENV{PKG_CONFIG_PATH}:${KINESIS_VIDEO_OPEN_SOURCE_SRC}/lib/pkgconfig")
   pkg_check_modules(LIBWEBSOCKET REQUIRED libwebsockets)
-  pkg_check_modules(LIBSRTP REQUIRED libsrtp2)
+  pkg_check_modules(LIBSRTP REQUIRED libsrtp)
 
   # usrsctp dont support pkgconfig yet
   find_library(

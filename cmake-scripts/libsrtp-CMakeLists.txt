@@ -16,10 +16,10 @@ endif()
 include(ExternalProject)
 ExternalProject_Add(project_libsrtp
     GIT_REPOSITORY    https://github.com/cisco/libsrtp.git
-    GIT_TAG           v2.2.0
+    GIT_TAG           v1.5.4
     PREFIX            ${CMAKE_CURRENT_BINARY_DIR}/build
-    CONFIGURE_COMMAND ${CONFIGURE_COMMAND}
-    BUILD_COMMAND     ${MAKE_EXE} shared_library
+    CONFIGURE_COMMAND ${CONFIGURE_COMMAND} --build=arm
+    BUILD_COMMAND     ${MAKE_EXE}
     BUILD_IN_SOURCE   TRUE
     INSTALL_COMMAND   ${MAKE_EXE} install
     TEST_COMMAND      ""

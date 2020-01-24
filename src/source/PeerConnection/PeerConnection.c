@@ -924,7 +924,7 @@ STATUS initKvsWebRtc(VOID)
 
     SRAND(GETTIME());
 
-    CHK(srtp_init() == srtp_err_status_ok, STATUS_SRTP_INIT_FAILED);
+    CHK(srtp_init() == err_status_ok, STATUS_SRTP_INIT_FAILED);
 
     // init endianness handling
     initializeEndianness();

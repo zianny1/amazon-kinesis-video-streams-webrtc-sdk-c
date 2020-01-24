@@ -9,8 +9,8 @@ STATUS initSrtpSession(PBYTE receiveKey, PBYTE transmitKey, SRTP_PROFILE profile
     STATUS retStatus = STATUS_SUCCESS;
     PSrtpSession pSrtpSession = NULL;
     srtp_policy_t transmitPolicy, receivePolicy;
-    void (*srtp_policy_setter)(srtp_crypto_policy_t*) = NULL;
-    void (*srtcp_policy_setter)(srtp_crypto_policy_t*) = NULL;
+    void (*srtp_policy_setter)(crypto_policy_t*) = NULL;
+    void (*srtcp_policy_setter)(crypto_policy_t*) = NULL;
 
     CHK(receiveKey != NULL && transmitKey != NULL && ppSrtpSession != NULL, STATUS_NULL_ARG);
 
@@ -21,12 +21,12 @@ STATUS initSrtpSession(PBYTE receiveKey, PBYTE transmitKey, SRTP_PROFILE profile
 
     switch (profile) {
         case SRTP_PROFILE_AES128_CM_HMAC_SHA1_32:
-            srtp_policy_setter = srtp_crypto_policy_set_aes_cm_128_hmac_sha1_32;
-            srtcp_policy_setter = srtp_crypto_policy_set_rtp_default;
+            srtp_policy_setter = crypto_policy_set_aes_cm_128_hmac_sha1_32;
+            srtcp_policy_setter = crypto_policy_set_rtp_default;
             break;
         case SRTP_PROFILE_AES128_CM_HMAC_SHA1_80:
-            srtp_policy_setter = srtp_crypto_policy_set_rtp_default;
-            srtcp_policy_setter = srtp_crypto_policy_set_rtp_default;
+            srtp_policy_setter = crypto_policy_set_rtp_default;
+            srtcp_policy_setter = crypto_policy_set_rtp_default;
             break;
         default:
             CHK(FALSE, STATUS_SSL_UNKNOWN_SRTP_PROFILE);
@@ -39,7 +39,7 @@ STATUS initSrtpSession(PBYTE receiveKey, PBYTE transmitKey, SRTP_PROFILE profile
     receivePolicy.ssrc.type = ssrc_any_inbound;
     receivePolicy.next = NULL;
 
-    CHK(srtp_create(&(pSrtpSession->srtp_receive_session), &receivePolicy) == srtp_err_status_ok, STATUS_SRTP_RECEIVE_SESSION_CREATION_FAILED);
+    CHK(srtp_create(&(pSrtpSession->srtp_receive_session), &receivePolicy) == err_status_ok, STATUS_SRTP_RECEIVE_SESSION_CREATION_FAILED);
 
     srtp_policy_setter(&transmitPolicy.rtp);
     srtcp_policy_setter(&transmitPolicy.rtcp);
@@ -48,7 +48,7 @@ STATUS initSrtpSession(PBYTE receiveKey, PBYTE transmitKey, SRTP_PROFILE profile
     transmitPolicy.ssrc.type = ssrc_any_outbound;
     transmitPolicy.next = NULL;
 
-    CHK(srtp_create(&(pSrtpSession->srtp_transmit_session), &transmitPolicy) == srtp_err_status_ok, STATUS_SRTP_TRANSMIT_SESSION_CREATION_FAILED);
+    CHK(srtp_create(&(pSrtpSession->srtp_transmit_session), &transmitPolicy) == err_status_ok, STATUS_SRTP_TRANSMIT_SESSION_CREATION_FAILED);
 
     *ppSrtpSession = pSrtpSession;
 
@@ -67,7 +67,7 @@ STATUS freeSrtpSession(PSrtpSession* ppSrtpSession)
 
     ENTERS();
     STATUS retStatus = STATUS_SUCCESS;
-    srtp_err_status_t errStatus;
+    err_status_t errStatus;
 
     PSrtpSession pSrtpSession = NULL;
 
@@ -77,11 +77,11 @@ STATUS freeSrtpSession(PSrtpSession* ppSrtpSession)
     pSrtpSession = *ppSrtpSession;
 
     if ((pSrtpSession->srtp_transmit_session != NULL) &&
-        (errStatus = srtp_dealloc(pSrtpSession->srtp_transmit_session)) != srtp_err_status_ok) {
+        (errStatus = srtp_dealloc(pSrtpSession->srtp_transmit_session)) != err_status_ok) {
         DLOGW("Dealloc of transmit session failed with error code %d\n", errStatus);
     }
     if ((pSrtpSession->srtp_receive_session != NULL) &&
-        (errStatus = srtp_dealloc(pSrtpSession->srtp_receive_session)) != srtp_err_status_ok) {
+        (errStatus = srtp_dealloc(pSrtpSession->srtp_receive_session)) != err_status_ok) {
         DLOGW("Dealloc of receive session failed with error code %d\n", errStatus);
     }
 
@@ -99,7 +99,7 @@ STATUS decryptSrtpPacket(PSrtpSession pSrtpSession, PVOID encryptedMessage, PINT
     ENTERS();
     STATUS retStatus = STATUS_SUCCESS;
 
-    CHK(srtp_unprotect(pSrtpSession->srtp_receive_session, encryptedMessage, len) == srtp_err_status_ok, STATUS_SRTP_DECRYPT_FAILED);
+    CHK(srtp_unprotect(pSrtpSession->srtp_receive_session, encryptedMessage, len) == err_status_ok, STATUS_SRTP_DECRYPT_FAILED);
 
 CleanUp:
     LEAVES();
@@ -111,7 +111,7 @@ STATUS decryptSrtcpPacket(PSrtpSession pSrtpSession, PVOID encryptedMessage, PIN
     ENTERS();
     STATUS retStatus = STATUS_SUCCESS;
 
-    CHK(srtp_unprotect_rtcp(pSrtpSession->srtp_receive_session, encryptedMessage, len) == srtp_err_status_ok, STATUS_SRTP_DECRYPT_FAILED);
+    CHK(srtp_unprotect_rtcp(pSrtpSession->srtp_receive_session, encryptedMessage, len) == err_status_ok, STATUS_SRTP_DECRYPT_FAILED);
 
 CleanUp:
     LEAVES();
@@ -123,11 +123,11 @@ STATUS encryptRtpPacket(PSrtpSession pSrtpSession, PVOID message, PINT32 len)
 {
     ENTERS();
     STATUS retStatus = STATUS_SUCCESS;
-    srtp_err_status_t status;
+    err_status_t status;
 
     status = srtp_protect(pSrtpSession->srtp_transmit_session, message, len);
 
-    CHK_ERR(status == srtp_err_status_ok, STATUS_SRTP_ENCRYPT_FAILED,
+    CHK_ERR(status == err_status_ok, STATUS_SRTP_ENCRYPT_FAILED,
             "srtp_protect returned %lu on srtp session %llu", status, pSrtpSession->srtp_transmit_session);
 
 CleanUp:

@@ -29,7 +29,7 @@ struct __SocketConnection;
 #include <openssl/rand.h>
 #include <openssl/sha.h>
 #include <openssl/ssl.h>
-#include <srtp2/srtp.h>
+#include <srtp/srtp.h>
 
 // INET/INET6 MUST be defined before usrsctp
 // If removed will cause corruption that is hard to determine at runtime
