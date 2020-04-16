@@ -69,6 +69,7 @@ STATUS viewerMessageReceived(UINT64 customData, PReceivedSignalingMessage pRecei
             CHK_STATUS(handleRemoteCandidate(pSampleStreamingSession, &pReceivedSignalingMessage->signalingMessage));
             break;
         case SIGNALING_MESSAGE_TYPE_ANSWER:
+            CVAR_BROADCAST(pSampleConfiguration->profiler.cvarGetAnswer);
             CHK_STATUS(handleAnswer(pSampleConfiguration, pSampleStreamingSession,
                                     &pReceivedSignalingMessage->signalingMessage));
             break;
@@ -603,7 +604,12 @@ STATUS createSampleConfiguration(PCHAR channelName, SIGNALING_CHANNEL_ROLE_TYPE 
     pSampleConfiguration->videoSenderTid = INVALID_TID_VALUE;
     pSampleConfiguration->signalingClientHandle = INVALID_SIGNALING_CLIENT_HANDLE_VALUE;
     pSampleConfiguration->sampleConfigurationObjLock = MUTEX_CREATE(TRUE);
+    printf("Here\n");
     pSampleConfiguration->cvar = CVAR_CREATE();
+    MEMSET(&pSampleConfiguration->profiler, 0x00, SIZEOF(Profiler));
+    pSampleConfiguration->profiler.getAnswerLock = MUTEX_CREATE(TRUE);
+    pSampleConfiguration->profiler.cvarGetAnswer = CVAR_CREATE();
+    printf("Here\n");
     pSampleConfiguration->trickleIce = trickleIce;
     pSampleConfiguration->useTurn = useTurn;
 
@@ -683,6 +689,13 @@ STATUS freeSampleConfiguration(PSampleConfiguration* ppSampleConfiguration)
         CVAR_FREE(pSampleConfiguration->cvar);
     }
 
+    if (IS_VALID_CVAR_VALUE(pSampleConfiguration->profiler.cvarGetAnswer)) {
+        CVAR_FREE(pSampleConfiguration->profiler.cvarGetAnswer);
+    }
+
+    if (IS_VALID_MUTEX_VALUE(pSampleConfiguration->profiler.getAnswerLock)) {
+        MUTEX_FREE(pSampleConfiguration->profiler.getAnswerLock);
+    }
     freeStaticCredentialProvider(&pSampleConfiguration->pCredentialProvider);
 
     MEMFREE(*ppSampleConfiguration);

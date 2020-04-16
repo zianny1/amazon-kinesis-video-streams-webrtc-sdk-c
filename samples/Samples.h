@@ -34,6 +34,11 @@ typedef struct __SampleStreamingSession SampleStreamingSession;
 typedef struct __SampleStreamingSession* PSampleStreamingSession;
 
 typedef struct {
+    MUTEX getAnswerLock;
+    CVAR cvarGetAnswer;
+}Profiler, *PProfiler;
+
+typedef struct {
     volatile ATOMIC_BOOL appTerminateFlag;
     volatile ATOMIC_BOOL interrupted;
     volatile ATOMIC_BOOL mediaThreadStarted;
@@ -66,6 +71,7 @@ typedef struct {
     UINT32 streamingSessionCount;
     SignalingClientCallbacks signalingClientCallbacks;
     SignalingClientInfo clientInfo;
+    Profiler profiler;
 } SampleConfiguration, *PSampleConfiguration;
 
 typedef VOID (*StreamSessionShutdownCallback)(UINT64, PSampleStreamingSession);

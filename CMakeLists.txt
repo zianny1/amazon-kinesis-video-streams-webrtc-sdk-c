@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
-project(KinesisVideoWebRTCClient LANGUAGES C)
+project(KinesisVideoWebRTCClient LANGUAGES C CXX)
 
 # User Flags
 option(BUILD_STATIC "Build with static linkage." OFF)
@@ -110,6 +110,7 @@ endif()
 find_package(Threads)
 find_package(PkgConfig REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(AWSSDK REQUIRED COMPONENTS monitoring events logs)
 
 pkg_check_modules(LIBWEBSOCKET REQUIRED libwebsockets)
 pkg_check_modules(LIBSRTP REQUIRED libsrtp2)
@@ -261,6 +262,13 @@ add_executable(
   ${KINESIS_VIDEO_WEBRTC_CLIENT_SRC}/samples/kvsWebRTCClientMaster.c)
 target_link_libraries(kvsWebrtcClientMaster kvsWebrtcClient
                       kvsWebrtcSignalingClient)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+add_executable(
+  kvsWebRTCProfiler
+  ${KINESIS_VIDEO_WEBRTC_CLIENT_SRC}/samples/Common.c
+  ${KINESIS_VIDEO_WEBRTC_CLIENT_SRC}/samples/kvsWebRTCProfiler.cpp)
+target_link_libraries(kvsWebRTCProfiler kvsWebrtcClient kvsWebrtcSignalingClient  ${AWSSDK_LINK_LIBRARIES})
 
 add_executable(
   kvsWebrtcClientViewer
