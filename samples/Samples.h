@@ -29,7 +29,7 @@ extern "C" {
 
 #define CA_CERT_PEM_FILE_EXTENSION                                              ".pem"
 
-#define FILE_LOGGING_BUFFER_SIZE                                                (100 * 1024)
+#define FILE_LOGGING_BUFFER_SIZE                                                (1024 * 1024)
 #define MAX_NUMBER_OF_LOG_FILES                                                  5
 typedef enum {
     SAMPLE_STREAMING_VIDEO_ONLY,

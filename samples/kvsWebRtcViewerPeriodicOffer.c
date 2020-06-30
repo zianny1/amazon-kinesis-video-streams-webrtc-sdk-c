@@ -16,6 +16,7 @@ INT32 main(INT32 argc, CHAR *argv[])
     signal(SIGINT, sigintHandler);
 #endif
 
+    SRAND(0);
     // do trickle-ice by default
     printf("[KVS Master] Using trickleICE by default\n");
 
@@ -35,7 +36,7 @@ INT32 main(INT32 argc, CHAR *argv[])
     pSampleConfiguration->enableFileLogging = TRUE;
     if(pSampleConfiguration->enableFileLogging) {
         retStatus = createFileLogger(FILE_LOGGING_BUFFER_SIZE, MAX_NUMBER_OF_LOG_FILES,
-                     (PCHAR) "viewer/", TRUE, TRUE, NULL);
+                     (PCHAR) "viewerPeriodic/", TRUE, TRUE, NULL);
         if(retStatus != STATUS_SUCCESS) {
             printf("[KVS Master] createFileLogger(): operation returned status code: 0x%08x \n", retStatus);
             pSampleConfiguration->enableFileLogging = FALSE;
@@ -90,6 +91,9 @@ INT32 main(INT32 argc, CHAR *argv[])
     MUTEX_UNLOCK(pSampleConfiguration->sampleConfigurationObjLock);
     locked = FALSE;
 
+    // Block until interrupted
+    while (!ATOMIC_LOAD_BOOL(&pSampleConfiguration->interrupted) && !ATOMIC_LOAD_BOOL(&pSampleStreamingSession->terminateFlag)) {
+
     memset(&offerSessionDescriptionInit, 0x00, SIZEOF(RtcSessionDescriptionInit));
 
     retStatus = createOffer(pSampleStreamingSession->pPeerConnection, &offerSessionDescriptionInit);
@@ -105,6 +109,7 @@ INT32 main(INT32 argc, CHAR *argv[])
         goto CleanUp;
     }
     printf("[KVS Viewer] Completed setting local description\n");
+
 
     retStatus = transceiverOnFrame(pSampleStreamingSession->pAudioRtcRtpTransceiver,
                                    (UINT64) pSampleStreamingSession,
@@ -165,7 +170,9 @@ INT32 main(INT32 argc, CHAR *argv[])
         printf("[KVS Viewer] signalingClientSendMessageSync(): operation returned status code: 0x%08x \n", retStatus);
         goto CleanUp;
     }
-
+    THREAD_SLEEP(RAND() % (((600 - 1 + 1) + 1) * HUNDREDS_OF_NANOS_IN_A_SECOND));
+    DLOGE("Offer sent\n");
+    }
     // Block until interrupted
     while (!ATOMIC_LOAD_BOOL(&pSampleConfiguration->interrupted) && !ATOMIC_LOAD_BOOL(&pSampleStreamingSession->terminateFlag)) {
         THREAD_SLEEP(HUNDREDS_OF_NANOS_IN_A_SECOND);

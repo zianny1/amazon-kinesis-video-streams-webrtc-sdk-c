@@ -153,14 +153,16 @@ STATUS masterMessageReceived(UINT64 customData, PReceivedSignalingMessage pRecei
 
     switch (pReceivedSignalingMessage->signalingMessage.messageType) {
         case SIGNALING_MESSAGE_TYPE_OFFER:
-            if (ATOMIC_COMPARE_EXCHANGE_BOOL(&pSampleStreamingSession->sdpOfferAnswerExchanged, &expected, TRUE)) {
+   //         if (ATOMIC_COMPARE_EXCHANGE_BOOL(&pSampleStreamingSession->sdpOfferAnswerExchanged, &expected, TRUE)) {
                 CHK_STATUS(handleOffer(pSampleConfiguration,
                                        pSampleStreamingSession,
                                        &pReceivedSignalingMessage->signalingMessage));
-            } else {
+                DLOGD("Offer receive time:%llu ms", pSampleStreamingSession->firstSdpMsgReceiveTime / HUNDREDS_OF_NANOS_IN_A_MILLISECOND);
+                pSampleStreamingSession->firstSdpMsgReceiveTime = GETTIME();
+   /*         } else {
                 DLOGD("Offer already received, ignore new offer from client id %s",
                       pReceivedSignalingMessage->signalingMessage.peerClientId);
-            }
+            }*/
             break;
         case SIGNALING_MESSAGE_TYPE_ICE_CANDIDATE:
             CHK_STATUS(handleRemoteCandidate(pSampleStreamingSession, &pReceivedSignalingMessage->signalingMessage));

@@ -245,6 +245,12 @@ add_executable(
 target_link_libraries(kvsWebrtcClientViewer kvsWebrtcClient kvsWebrtcSignalingClient kvspicUtils)
 
 add_executable(
+  kvsWebrtcViewerPeriodic
+  ${KINESIS_VIDEO_WEBRTC_CLIENT_SRC}/samples/Common.c
+  ${KINESIS_VIDEO_WEBRTC_CLIENT_SRC}/samples/kvsWebRtcViewerPeriodicOffer.c)
+target_link_libraries(kvsWebrtcViewerPeriodic kvsWebrtcClient kvsWebrtcSignalingClient kvspicUtils)
+
+add_executable(
         discoverNatBehavior
         ${KINESIS_VIDEO_WEBRTC_CLIENT_SRC}/samples/discoverNatBehavior.c)
 target_link_libraries(discoverNatBehavior kvsWebrtcClient)
