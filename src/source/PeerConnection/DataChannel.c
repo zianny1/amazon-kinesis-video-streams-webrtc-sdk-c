@@ -105,3 +105,13 @@ CleanUp:
     LEAVES();
     return retStatus;
 }
+
+STATUS dataChannelClose(PRtcDataChannel pRtcDataChannel)
+{
+    ENTERS();
+
+CleanUp:
+
+    LEAVES();
+    return retStatus;
+}
